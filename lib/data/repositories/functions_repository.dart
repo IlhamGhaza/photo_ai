@@ -1,0 +1,59 @@
+import 'package:cloud_functions/cloud_functions.dart';
+
+/// Repository for Firebase Cloud Functions
+/// Handles calls to backend functions for AI image generation
+class FunctionsRepository {
+  final FirebaseFunctions _functions = FirebaseFunctions.instance;
+
+  /// Call generateImages Cloud Function
+  /// Input: { imageUrl: string }
+  /// Output: { generatedUrls: string[] }
+  Future<List<String>> generateImages({
+    required String imageUrl,
+  }) async {
+    try {
+      final callable = _functions.httpsCallable('generateImages');
+      
+      final result = await callable.call({
+        'imageUrl': imageUrl,
+      });
+
+      // Extract generated URLs from response
+      final data = result.data as Map<String, dynamic>;
+      final generatedUrls = List<String>.from(data['generatedUrls'] as List);
+      
+      return generatedUrls;
+    } catch (e) {
+      print('Cloud Function error: $e');
+      rethrow;
+    }
+  }
+
+  /// Call generateImages Cloud Function with timeout
+  /// Useful for long-running AI operations
+  Future<List<String>> generateImagesWithTimeout({
+    required String imageUrl,
+    Duration timeout = const Duration(minutes: 5),
+  }) async {
+    try {
+      final callable = _functions.httpsCallable(
+        'generateImages',
+        options: HttpsCallableOptions(
+          timeout: timeout,
+        ),
+      );
+      
+      final result = await callable.call({
+        'imageUrl': imageUrl,
+      });
+
+      final data = result.data as Map<String, dynamic>;
+      final generatedUrls = List<String>.from(data['generatedUrls'] as List);
+      
+      return generatedUrls;
+    } catch (e) {
+      print('Cloud Function error: $e');
+      rethrow;
+    }
+  }
+}

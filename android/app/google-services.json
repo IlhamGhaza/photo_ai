@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "176566835427",
+    "project_id": "photo-ai-482a7",
+    "storage_bucket": "photo-ai-482a7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:176566835427:android:0521d0c382c5313ff20dd6",
+        "android_client_info": {
+          "package_name": "com.igz.photoai"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3J_JvIP9pD-ZKoIj2E1x1xXg64vIs2ks"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
