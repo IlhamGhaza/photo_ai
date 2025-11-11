@@ -1,1 +1,43 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"photo-ai-482a7","appId":"1:176566835427:android:0521d0c382c5313ff20dd6","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"photo-ai-482a7","configurations":{"android":"1:176566835427:android:0521d0c382c5313ff20dd6","ios":"1:176566835427:ios:67c7ab04ce15c435f20dd6"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "photo-ai-482a7",
+          "appId": "1:176566835427:android:0521d0c382c5313ff20dd6",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "photo-ai-482a7",
+          "configurations": {
+            "android": "1:176566835427:android:0521d0c382c5313ff20dd6",
+            "ios": "1:176566835427:ios:67c7ab04ce15c435f20dd6"
+          }
+        }
+      }
+    }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log"
+      ],
+      "predeploy": [],
+      "runtime": "nodejs22"
+    }
+  ],
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  }
+}

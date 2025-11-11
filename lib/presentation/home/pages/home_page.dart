@@ -8,6 +8,8 @@ import '../widgets/upload_section.dart';
 import '../widgets/generate_section.dart';
 import '../widgets/results_tabs.dart';
 import '../widgets/image_modal.dart';
+import '../widgets/saved_images_card.dart';
+import 'saved_images_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -35,6 +37,15 @@ class _HomePageState extends State<HomePage> {
 
   void _closeImageModal() {
     setState(() => _selectedImageUrl = null);
+  }
+
+  void _navigateToSavedImages() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const SavedImagesPage(),
+      ),
+    );
   }
 
   @override
@@ -89,8 +100,22 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildContent(PhotoProvider provider) {
     if (provider.appState == AppState.empty) {
-      return EmptyStateWidget(
-        onImageSelected: (file) => provider.uploadImage(file),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 32),
+          
+          // Saved Images Card - Always accessible
+          SavedImagesCard(
+            savedCount: provider.savedImages.length,
+            onTap: () => _navigateToSavedImages(),
+          ),
+          
+          // Empty State
+          EmptyStateWidget(
+            onImageSelected: (file) => provider.uploadImage(file),
+          ),
+        ],
       );
     }
 
@@ -98,6 +123,12 @@ class _HomePageState extends State<HomePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 32),
+        
+        // Saved Images Card - Always accessible
+        SavedImagesCard(
+          savedCount: provider.savedImages.length,
+          onTap: () => _navigateToSavedImages(),
+        ),
         
         // Upload Section
         UploadSection(

@@ -132,4 +132,92 @@ class FirestoreRepository {
       rethrow;
     }
   }
+
+  /// Save/bookmark a generated image
+  Future<void> saveImage({
+    required String userId,
+    required String imageId,
+    required String imageUrl,
+    required String style,
+  }) async {
+    try {
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('saved')
+          .doc(imageId)
+          .set({
+        'url': imageUrl,
+        'style': style,
+        'savedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print('Error saving image: $e');
+      rethrow;
+    }
+  }
+
+  /// Unsave/unbookmark an image
+  Future<void> unsaveImage({
+    required String userId,
+    required String imageId,
+  }) async {
+    try {
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('saved')
+          .doc(imageId)
+          .delete();
+    } catch (e) {
+      print('Error unsaving image: $e');
+      rethrow;
+    }
+  }
+
+  /// Get all saved/bookmarked images
+  Future<List<Map<String, dynamic>>> getSavedImages({
+    required String userId,
+  }) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('saved')
+          .orderBy('savedAt', descending: true)
+          .get();
+
+      return querySnapshot.docs.map((doc) {
+        final data = doc.data();
+        return {
+          'id': doc.id,
+          'url': data['url'] as String,
+          'style': data['style'] as String,
+          'savedAt': (data['savedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+        };
+      }).toList();
+    } catch (e) {
+      print('Error getting saved images: $e');
+      return [];
+    }
+  }
+
+  /// Check if an image is saved
+  Future<bool> isImageSaved({
+    required String userId,
+    required String imageId,
+  }) async {
+    try {
+      final doc = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('saved')
+          .doc(imageId)
+          .get();
+      return doc.exists;
+    } catch (e) {
+      print('Error checking if image is saved: $e');
+      return false;
+    }
+  }
 }

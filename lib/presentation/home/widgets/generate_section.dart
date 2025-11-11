@@ -54,26 +54,29 @@ class _GenerateSectionState extends State<GenerateSection>
           width: double.infinity,
           child: ElevatedButton(
             onPressed: isDisabled ? null : widget.onGenerate,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: isDisabled ? AppTheme.gray200 : AppTheme.brandPrimary,
-              foregroundColor: isDisabled ? AppTheme.gray400 : Colors.white,
-              disabledBackgroundColor: AppTheme.gray200,
-              disabledForegroundColor: AppTheme.gray400,
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              elevation: isDisabled ? 0 : 8,
-              shadowColor: AppTheme.brandPrimary.withOpacity(0.3),
-            ).copyWith(
-              backgroundColor: isDisabled
-                  ? MaterialStateProperty.all(AppTheme.gray200)
-                  : MaterialStateProperty.resolveWith((states) {
-                      return states.contains(MaterialState.pressed)
-                          ? AppTheme.brandSecondary
-                          : AppTheme.brandPrimary;
-                    }),
-            ),
+            style:
+                ElevatedButton.styleFrom(
+                  backgroundColor: isDisabled
+                      ? AppTheme.gray200
+                      : AppTheme.brandPrimary,
+                  foregroundColor: isDisabled ? AppTheme.gray400 : Colors.white,
+                  disabledBackgroundColor: AppTheme.gray200,
+                  disabledForegroundColor: AppTheme.gray400,
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: isDisabled ? 0 : 8,
+                  shadowColor: AppTheme.brandPrimary.withValues(alpha: 0.3),
+                ).copyWith(
+                  backgroundColor: isDisabled
+                      ? MaterialStateProperty.all(AppTheme.gray200)
+                      : MaterialStateProperty.resolveWith((states) {
+                          return states.contains(MaterialState.pressed)
+                              ? AppTheme.brandSecondary
+                              : AppTheme.brandPrimary;
+                        }),
+                ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -92,9 +95,9 @@ class _GenerateSectionState extends State<GenerateSection>
                 Text(
                   isGenerating ? 'Generating Styles...' : 'Generate Styles',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: isDisabled ? AppTheme.gray400 : Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    color: isDisabled ? AppTheme.gray400 : Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
@@ -109,15 +112,15 @@ class _GenerateSectionState extends State<GenerateSection>
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  AppTheme.brandPrimary.withOpacity(0.05),
-                  AppTheme.brandSecondary.withOpacity(0.05),
+                  AppTheme.brandPrimary.withValues(alpha: 0.05),
+                  AppTheme.brandSecondary.withValues(alpha: 0.05),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: AppTheme.brandPrimary.withOpacity(0.1),
+                color: AppTheme.brandPrimary.withValues(alpha: 0.1),
               ),
             ),
             child: Column(
@@ -134,9 +137,12 @@ class _GenerateSectionState extends State<GenerateSection>
                             animation: _dotController,
                             builder: (context, child) {
                               final delay = index * 0.2;
-                              final value = (_dotController.value + delay) % 1.0;
-                              final scale = 1.0 + (0.4 * (1 - (value - 0.5).abs() * 2));
-                              final opacity = 0.4 + (0.6 * (1 - (value - 0.5).abs() * 2));
+                              final value =
+                                  (_dotController.value + delay) % 1.0;
+                              final scale =
+                                  1.0 + (0.4 * (1 - (value - 0.5).abs() * 2));
+                              final opacity =
+                                  0.4 + (0.6 * (1 - (value - 0.5).abs() * 2));
 
                               return Container(
                                 margin: const EdgeInsets.only(right: 6),
@@ -147,7 +153,7 @@ class _GenerateSectionState extends State<GenerateSection>
                                     AppTheme.brandPrimary,
                                     AppTheme.brandSecondary,
                                     const Color(0xFFEC4899),
-                                  ][index].withOpacity(opacity),
+                                  ][index].withValues(alpha: opacity),
                                   shape: BoxShape.circle,
                                 ),
                                 transform: Matrix4.identity()..scale(scale),
@@ -164,16 +170,14 @@ class _GenerateSectionState extends State<GenerateSection>
                         children: [
                           Text(
                             'AI Processing',
-                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(fontWeight: FontWeight.w600),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             'Creating your stunning travel photos...',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppTheme.gray600,
-                                ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: AppTheme.gray600),
                           ),
                         ],
                       ),
@@ -181,14 +185,14 @@ class _GenerateSectionState extends State<GenerateSection>
                   ],
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Progress Bar
                 ClipRRect(
                   borderRadius: BorderRadius.circular(4),
                   child: LinearProgressIndicator(
                     value: widget.generationProgress,
                     minHeight: 6,
-                    backgroundColor: Colors.white.withOpacity(0.5),
+                    backgroundColor: Colors.white.withValues(alpha: 0.5),
                     valueColor: const AlwaysStoppedAnimation<Color>(
                       AppTheme.brandPrimary,
                     ),
@@ -206,14 +210,11 @@ class _GenerateSectionState extends State<GenerateSection>
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: const Color(0xFFFEF2F2),
-              border: Border.all(
-                color: const Color(0xFFFECACA),
-                width: 2,
-              ),
+              border: Border.all(color: const Color(0xFFFECACA), width: 2),
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.red.withOpacity(0.05),
+                  color: Colors.red.withValues(alpha: 0.05),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -243,23 +244,23 @@ class _GenerateSectionState extends State<GenerateSection>
                       Text(
                         'Generation Failed',
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: const Color(0xFF991B1B),
-                              fontWeight: FontWeight.w600,
-                            ),
+                          color: const Color(0xFF991B1B),
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         widget.errorMessage,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: const Color(0xFFB91C1C),
-                            ),
+                          color: const Color(0xFFB91C1C),
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'Tap "Try Again" to start a new attempt. If the issue persists, check your internet connection',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppTheme.gray600,
-                            ),
+                          color: AppTheme.gray600,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       TextButton.icon(
@@ -268,15 +269,11 @@ class _GenerateSectionState extends State<GenerateSection>
                           padding: EdgeInsets.zero,
                           foregroundColor: const Color(0xFFB91C1C),
                         ),
-                        icon: const Icon(
-                          Icons.refresh,
-                          size: 16,
-                        ),
+                        icon: const Icon(Icons.refresh, size: 16),
                         label: Text(
                           'Try Again',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(fontWeight: FontWeight.w600),
                         ),
                       ),
                     ],

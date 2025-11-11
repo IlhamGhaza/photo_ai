@@ -7,8 +7,8 @@ class FunctionsRepository {
 
   /// Call generateImages Cloud Function
   /// Input: { imageUrl: string }
-  /// Output: { generatedUrls: string[] }
-  Future<List<String>> generateImages({
+  /// Output: { generatedUrls: string[], stylesUsed: string[] }
+  Future<Map<String, dynamic>> generateImages({
     required String imageUrl,
   }) async {
     try {
@@ -18,11 +18,13 @@ class FunctionsRepository {
         'imageUrl': imageUrl,
       });
 
-      // Extract generated URLs from response
+      // Return complete response from Cloud Function
       final data = result.data as Map<String, dynamic>;
-      final generatedUrls = List<String>.from(data['generatedUrls'] as List);
       
-      return generatedUrls;
+      return {
+        'generatedUrls': List<String>.from(data['generatedUrls'] as List),
+        'stylesUsed': List<String>.from((data['styles'] as List?) ?? (data['stylesUsed'] as List?) ?? []),
+      };
     } catch (e) {
       print('Cloud Function error: $e');
       rethrow;
@@ -31,7 +33,7 @@ class FunctionsRepository {
 
   /// Call generateImages Cloud Function with timeout
   /// Useful for long-running AI operations
-  Future<List<String>> generateImagesWithTimeout({
+  Future<Map<String, dynamic>> generateImagesWithTimeout({
     required String imageUrl,
     Duration timeout = const Duration(minutes: 5),
   }) async {
@@ -47,10 +49,13 @@ class FunctionsRepository {
         'imageUrl': imageUrl,
       });
 
+      // Return complete response from Cloud Function
       final data = result.data as Map<String, dynamic>;
-      final generatedUrls = List<String>.from(data['generatedUrls'] as List);
       
-      return generatedUrls;
+      return {
+        'generatedUrls': List<String>.from(data['generatedUrls'] as List),
+        'stylesUsed': List<String>.from((data['styles'] as List?) ?? (data['stylesUsed'] as List?) ?? []),
+      };
     } catch (e) {
       print('Cloud Function error: $e');
       rethrow;

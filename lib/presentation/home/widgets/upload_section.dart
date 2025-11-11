@@ -37,9 +37,9 @@ class UploadSection extends StatelessWidget {
           children: [
             Text(
               'Your Photo',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
             if (imageFile != null)
               Row(
@@ -63,7 +63,8 @@ class UploadSection extends StatelessWidget {
                           const SizedBox(width: 6),
                           Text(
                             'Replace',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
                                   color: AppTheme.gray600,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -72,9 +73,9 @@ class UploadSection extends StatelessWidget {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(width: 4),
-                  
+
                   // Clear Button
                   InkWell(
                     onTap: onReset,
@@ -94,7 +95,8 @@ class UploadSection extends StatelessWidget {
                           const SizedBox(width: 6),
                           Text(
                             'Clear',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
                                   color: AppTheme.gray600,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -124,7 +126,7 @@ class UploadSection extends StatelessWidget {
               border: Border.all(color: AppTheme.gray200),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
+                  color: Colors.black.withValues(alpha: 0.03),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -133,10 +135,7 @@ class UploadSection extends StatelessWidget {
             child: imageFile != null
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(24),
-                    child: Image.file(
-                      imageFile!,
-                      fit: BoxFit.cover,
-                    ),
+                    child: Image.file(imageFile!, fit: BoxFit.cover),
                   )
                 : Material(
                     color: Colors.transparent,
@@ -159,7 +158,7 @@ class UploadSection extends StatelessWidget {
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.03),
+                                  color: Colors.black.withValues(alpha: 0.03),
                                   blurRadius: 4,
                                 ),
                               ],
@@ -173,7 +172,8 @@ class UploadSection extends StatelessWidget {
                           const SizedBox(height: 16),
                           Text(
                             'Upload or take a photo',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
                                   fontWeight: FontWeight.w600,
                                   color: AppTheme.gray900,
                                 ),
@@ -181,9 +181,8 @@ class UploadSection extends StatelessWidget {
                           const SizedBox(height: 4),
                           Text(
                             'JPG, PNG up to 10MB',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppTheme.gray500,
-                                ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: AppTheme.gray500),
                           ),
                         ],
                       ),
