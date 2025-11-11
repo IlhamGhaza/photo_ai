@@ -53,10 +53,7 @@ class _ResultsTabsState extends State<ResultsTabs>
         Container(
           decoration: const BoxDecoration(
             border: Border(
-              bottom: BorderSide(
-                color: AppTheme.gray200,
-                width: 2,
-              ),
+              bottom: BorderSide(color: AppTheme.gray200, width: 2),
             ),
           ),
           child: Row(
@@ -89,6 +86,7 @@ class _ResultsTabsState extends State<ResultsTabs>
               SavedGrid(
                 images: widget.savedImages,
                 onImageTap: widget.onImageTap,
+                onUnsaveImage: widget.onUnsaveImage,
               ),
             ],
           ),
@@ -110,7 +108,7 @@ class _ResultsTabsState extends State<ResultsTabs>
         animation: _tabController,
         builder: (context, child) {
           final isActive = _tabController.index == index;
-          
+
           return Container(
             padding: const EdgeInsets.only(bottom: 12),
             decoration: BoxDecoration(
@@ -126,9 +124,9 @@ class _ResultsTabsState extends State<ResultsTabs>
                 Text(
                   label,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: isActive ? AppTheme.gray900 : AppTheme.gray500,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    color: isActive ? AppTheme.gray900 : AppTheme.gray500,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 if (count > 0) ...[
                   const SizedBox(width: 8),
@@ -142,7 +140,7 @@ class _ResultsTabsState extends State<ResultsTabs>
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: AppTheme.brandPrimary.withOpacity(0.2),
+                          color: AppTheme.brandPrimary.withValues(alpha: 0.2),
                           blurRadius: 4,
                         ),
                       ],
@@ -150,10 +148,10 @@ class _ResultsTabsState extends State<ResultsTabs>
                     child: Text(
                       count.toString(),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 11,
-                          ),
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 11,
+                      ),
                     ),
                   ),
                 ],

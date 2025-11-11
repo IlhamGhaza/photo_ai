@@ -7,10 +7,7 @@ import '../../../core/theme/app_theme.dart';
 class EmptyStateWidget extends StatefulWidget {
   final Function(File) onImageSelected;
 
-  const EmptyStateWidget({
-    super.key,
-    required this.onImageSelected,
-  });
+  const EmptyStateWidget({super.key, required this.onImageSelected});
 
   @override
   State<EmptyStateWidget> createState() => _EmptyStateWidgetState();
@@ -30,13 +27,15 @@ class _EmptyStateWidgetState extends State<EmptyStateWidget>
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.9, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.9,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
-    );
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
 
     _controller.forward();
   }
@@ -78,10 +77,7 @@ class _EmptyStateWidgetState extends State<EmptyStateWidget>
           backgroundColor: Colors.black,
           lockAspectRatio: false,
         ),
-        IOSUiSettings(
-          title: 'Crop Photo',
-          aspectRatioLockEnabled: false,
-        ),
+        IOSUiSettings(title: 'Crop Photo', aspectRatioLockEnabled: false),
       ],
     );
   }
@@ -105,8 +101,8 @@ class _EmptyStateWidgetState extends State<EmptyStateWidget>
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        AppTheme.brandPrimary.withOpacity(0.1),
-                        AppTheme.brandSecondary.withOpacity(0.1),
+                        AppTheme.brandPrimary.withValues(alpha: 0.1),
+                        AppTheme.brandSecondary.withValues(alpha: 0.1),
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -114,7 +110,7 @@ class _EmptyStateWidgetState extends State<EmptyStateWidget>
                     borderRadius: BorderRadius.circular(32),
                     boxShadow: [
                       BoxShadow(
-                        color: AppTheme.brandPrimary.withOpacity(0.1),
+                        color: AppTheme.brandPrimary.withValues(alpha: 0.1),
                         blurRadius: 20,
                         offset: const Offset(0, 8),
                       ),
@@ -134,9 +130,9 @@ class _EmptyStateWidgetState extends State<EmptyStateWidget>
               Text(
                 'Create AI Travel Photos',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.5,
-                    ),
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.5,
+                ),
                 textAlign: TextAlign.center,
               ),
 
@@ -145,9 +141,9 @@ class _EmptyStateWidgetState extends State<EmptyStateWidget>
               // Description
               Text(
                 'Upload a photo and watch AI transform it into stunning travel and lifestyle scenes',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppTheme.gray600,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(color: AppTheme.gray600),
                 textAlign: TextAlign.center,
               ),
 
@@ -166,7 +162,7 @@ class _EmptyStateWidgetState extends State<EmptyStateWidget>
                       borderRadius: BorderRadius.circular(16),
                     ),
                     elevation: 8,
-                    shadowColor: AppTheme.gray900.withOpacity(0.3),
+                    shadowColor: AppTheme.gray900.withValues(alpha: 0.3),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -175,7 +171,8 @@ class _EmptyStateWidgetState extends State<EmptyStateWidget>
                       const SizedBox(width: 12),
                       Text(
                         'Upload Photo',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
                             ),
@@ -208,7 +205,8 @@ class _EmptyStateWidgetState extends State<EmptyStateWidget>
                       const SizedBox(width: 12),
                       Text(
                         'Take Photo',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
                               color: AppTheme.gray700,
                               fontWeight: FontWeight.w600,
                             ),
@@ -245,18 +243,15 @@ class _EmptyStateWidgetState extends State<EmptyStateWidget>
         Container(
           width: 6,
           height: 6,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 8),
         Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppTheme.gray400,
-                fontSize: 13,
-              ),
+            color: AppTheme.gray400,
+            fontSize: 13,
+          ),
         ),
       ],
     );

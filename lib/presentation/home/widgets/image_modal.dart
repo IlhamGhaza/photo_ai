@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import '../../../core/theme/app_theme.dart';
 
@@ -10,11 +12,7 @@ class ImageModal extends StatefulWidget {
   final String imageUrl;
   final VoidCallback onClose;
 
-  const ImageModal({
-    super.key,
-    required this.imageUrl,
-    required this.onClose,
-  });
+  const ImageModal({super.key, required this.imageUrl, required this.onClose});
 
   @override
   State<ImageModal> createState() => _ImageModalState();
@@ -35,13 +33,15 @@ class _ImageModalState extends State<ImageModal>
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
-    );
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
 
-    _scaleAnimation = Tween<double>(begin: 0.9, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.9,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
 
     _controller.forward();
   }
@@ -53,20 +53,71 @@ class _ImageModalState extends State<ImageModal>
   }
 
   Future<void> _downloadImage() async {
-    setState(() => _isDownloading = true);
+    if (_isDownloading) return;
+
+    String? directoryPath;
+    try {
+      directoryPath = await FilePicker.platform.getDirectoryPath(
+        dialogTitle: 'Select download folder',
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Unable to open folder picker: $e'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+      return;
+    }
+
+    if (directoryPath == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Download cancelled.'),
+            backgroundColor: Colors.grey,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+      return;
+    }
+
+    if (mounted) {
+      setState(() => _isDownloading = true);
+    }
 
     try {
       final response = await http.get(Uri.parse(widget.imageUrl));
-      final documentDirectory = await getApplicationDocumentsDirectory();
-      final file = File(
-        '${documentDirectory.path}/photo_ai_${DateTime.now().millisecondsSinceEpoch}.jpg',
-      );
+      if (response.statusCode != 200) {
+        throw Exception('Failed to download image (status ${response.statusCode})');
+      }
+
+      final fallbackDirectory = await getApplicationDocumentsDirectory();
+      final saveDirectory = Directory(directoryPath);
+      final targetDirectory = await saveDirectory.exists()
+          ? saveDirectory
+          : Directory(fallbackDirectory.path);
+
+      final fileName =
+          'photo_ai_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final filePath = p.join(targetDirectory.path, fileName);
+      final file = File(filePath);
       await file.writeAsBytes(response.bodyBytes);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Image downloaded successfully!'),
+            content: Text('Image saved to $filePath'),
             backgroundColor: AppTheme.brandPrimary,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -97,10 +148,7 @@ class _ImageModalState extends State<ImageModal>
 
   Future<void> _shareImage() async {
     try {
-      await Share.share(
-        widget.imageUrl,
-        subject: 'Photo AI - Generated Image',
-      );
+      await Share.share(widget.imageUrl, subject: 'Photo AI - Generated Image');
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -122,7 +170,7 @@ class _ImageModalState extends State<ImageModal>
     return FadeTransition(
       opacity: _fadeAnimation,
       child: Material(
-        color: Colors.black.withOpacity(0.95),
+        color: Colors.black.withValues(alpha: 0.95),
         child: SafeArea(
           child: Stack(
             children: [
@@ -146,7 +194,7 @@ class _ImageModalState extends State<ImageModal>
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.black.withOpacity(0.5),
+                        Colors.black.withValues(alpha: 0.5),
                         Colors.transparent,
                       ],
                     ),
@@ -172,7 +220,8 @@ class _ImageModalState extends State<ImageModal>
                           const SizedBox(width: 12),
                           Text(
                             'Preview',
-                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -185,7 +234,7 @@ class _ImageModalState extends State<ImageModal>
                           width: 36,
                           height: 36,
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.1),
+                            color: Colors.white.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: const Icon(
@@ -215,7 +264,7 @@ class _ImageModalState extends State<ImageModal>
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.5),
+                            color: Colors.black.withValues(alpha: 0.5),
                             blurRadius: 30,
                             spreadRadius: 5,
                           ),
@@ -236,10 +285,7 @@ class _ImageModalState extends State<ImageModal>
                           ),
                           errorWidget: (context, url, error) => Container(
                             color: AppTheme.gray800,
-                            child: const Icon(
-                              Icons.error,
-                              color: Colors.white,
-                            ),
+                            child: const Icon(Icons.error, color: Colors.white),
                           ),
                         ),
                       ),
@@ -260,7 +306,7 @@ class _ImageModalState extends State<ImageModal>
                       begin: Alignment.bottomCenter,
                       end: Alignment.topCenter,
                       colors: [
-                        Colors.black.withOpacity(0.5),
+                        Colors.black.withValues(alpha: 0.5),
                         Colors.transparent,
                       ],
                     ),
@@ -273,9 +319,13 @@ class _ImageModalState extends State<ImageModal>
                             child: ElevatedButton(
                               onPressed: _isDownloading ? null : _downloadImage,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white.withOpacity(0.1),
+                                backgroundColor: Colors.white.withValues(
+                                  alpha: 0.1,
+                                ),
                                 foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
                                 ),
@@ -290,16 +340,19 @@ class _ImageModalState extends State<ImageModal>
                                       height: 20,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                          Colors.white,
-                                        ),
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.white,
+                                            ),
                                       ),
                                     )
                                   else
                                     const Icon(Icons.download, size: 20),
                                   const SizedBox(width: 12),
                                   Text(
-                                    _isDownloading ? 'Downloading...' : 'Download',
+                                    _isDownloading
+                                        ? 'Downloading...'
+                                        : 'Download',
                                     style: Theme.of(context)
                                         .textTheme
                                         .titleMedium
@@ -317,9 +370,13 @@ class _ImageModalState extends State<ImageModal>
                             child: ElevatedButton(
                               onPressed: _shareImage,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white.withOpacity(0.1),
+                                backgroundColor: Colors.white.withValues(
+                                  alpha: 0.1,
+                                ),
                                 foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
                                 ),
@@ -350,9 +407,9 @@ class _ImageModalState extends State<ImageModal>
                       Text(
                         'Press ESC or tap outside to close',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.white.withOpacity(0.6),
-                              fontSize: 11,
-                            ),
+                          color: Colors.white.withValues(alpha: 0.6),
+                          fontSize: 11,
+                        ),
                       ),
                     ],
                   ),

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -94,7 +96,7 @@ class ResultsGrid extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 8,
                   ),
                 ],
@@ -108,16 +110,16 @@ class ResultsGrid extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               'No Images Yet',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             Text(
               'Upload a photo and generate styles to see your AI-created images here',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppTheme.gray500,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppTheme.gray500),
               textAlign: TextAlign.center,
             ),
           ],
@@ -160,13 +162,15 @@ class _ImageCardState extends State<_ImageCard>
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.9, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.9,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
-    );
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
 
     _controller.forward();
   }
@@ -191,7 +195,7 @@ class _ImageCardState extends State<_ImageCard>
               border: Border.all(color: AppTheme.gray200),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
+                  color: Colors.black.withValues(alpha: 0.08),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -211,10 +215,26 @@ class _ImageCardState extends State<_ImageCard>
                       highlightColor: AppTheme.gray200,
                       child: Container(color: Colors.white),
                     ),
-                    errorWidget: (context, url, error) => Container(
-                      color: AppTheme.gray100,
-                      child: const Icon(Icons.error),
-                    ),
+                    errorWidget: (context, url, error) {
+                      log('Error loading image: $url');
+                      log('Error details: $error');
+                      return Container(
+                        color: AppTheme.gray100,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.error, color: AppTheme.gray400),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Load Error',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: AppTheme.gray500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
 
                   // Gradient Overlay
@@ -226,7 +246,7 @@ class _ImageCardState extends State<_ImageCard>
                           end: Alignment.bottomCenter,
                           colors: [
                             Colors.transparent,
-                            Colors.black.withOpacity(0.7),
+                            Colors.black.withValues(alpha: 0.7),
                           ],
                           stops: const [0.5, 1.0],
                         ),
@@ -246,19 +266,23 @@ class _ImageCardState extends State<_ImageCard>
                         decoration: BoxDecoration(
                           color: widget.isSaved
                               ? AppTheme.brandPrimary
-                              : Colors.white.withOpacity(0.9),
+                              : Colors.white.withValues(alpha: 0.9),
                           borderRadius: BorderRadius.circular(10),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
+                              color: Colors.black.withValues(alpha: 0.2),
                               blurRadius: 8,
                             ),
                           ],
                         ),
                         child: Icon(
-                          widget.isSaved ? Icons.bookmark : Icons.bookmark_border,
+                          widget.isSaved
+                              ? Icons.bookmark
+                              : Icons.bookmark_border,
                           size: 16,
-                          color: widget.isSaved ? Colors.white : AppTheme.gray700,
+                          color: widget.isSaved
+                              ? Colors.white
+                              : AppTheme.gray700,
                         ),
                       ),
                     ),
@@ -272,15 +296,15 @@ class _ImageCardState extends State<_ImageCard>
                     child: Text(
                       widget.image.style,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            shadows: [
-                              Shadow(
-                                color: Colors.black.withOpacity(0.5),
-                                blurRadius: 4,
-                              ),
-                            ],
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withValues(alpha: 0.5),
+                            blurRadius: 4,
                           ),
+                        ],
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),

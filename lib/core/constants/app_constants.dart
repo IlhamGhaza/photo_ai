@@ -1,10 +1,5 @@
-import '../utils/env.dart';
-
 class AppConstants {
-  // Gemini AI Configuration
-  static const String geminiApiKey = Env.geminiApiKey;
-  
-  // Image Generation Prompts
+  // Image Generation Prompts (fallback only - not used anymore)
   static const List<String> travelStyles = [
     'Mountain Vista - dramatic mountain landscape at golden hour',
     'Beach Paradise - tropical beach with crystal clear water',

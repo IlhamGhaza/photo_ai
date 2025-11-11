@@ -7,11 +7,13 @@ import '../../../data/models/generated_image.dart';
 class SavedGrid extends StatelessWidget {
   final List<GeneratedImage> images;
   final Function(String) onImageTap;
+  final Function(String) onUnsaveImage;
 
   const SavedGrid({
     super.key,
     required this.images,
     required this.onImageTap,
+    required this.onUnsaveImage,
   });
 
   @override
@@ -34,6 +36,7 @@ class SavedGrid extends StatelessWidget {
         return _SavedImageCard(
           image: image,
           onTap: () => onImageTap(image.url),
+          onUnsave: () => onUnsaveImage(image.id),
           index: index,
         );
       },
@@ -55,7 +58,7 @@ class SavedGrid extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 12,
                   ),
                 ],
@@ -67,8 +70,8 @@ class SavedGrid extends StatelessWidget {
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          AppTheme.brandPrimary.withOpacity(0.1),
-                          AppTheme.brandSecondary.withOpacity(0.1),
+                          AppTheme.brandPrimary.withValues(alpha: 0.1),
+                          AppTheme.brandSecondary.withValues(alpha: 0.1),
                         ],
                       ),
                       borderRadius: BorderRadius.circular(16),
@@ -85,16 +88,16 @@ class SavedGrid extends StatelessWidget {
             const SizedBox(height: 20),
             Text(
               'No Saved Images',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 8),
             Text(
               'Save your favorite generated images by tapping the bookmark icon to access them quickly',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppTheme.gray600,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppTheme.gray600),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -110,9 +113,9 @@ class SavedGrid extends StatelessWidget {
                 Text(
                   'Start generating to save images',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppTheme.gray500,
-                        fontSize: 11,
-                      ),
+                    color: AppTheme.gray500,
+                    fontSize: 11,
+                  ),
                 ),
               ],
             ),
@@ -126,11 +129,13 @@ class SavedGrid extends StatelessWidget {
 class _SavedImageCard extends StatefulWidget {
   final GeneratedImage image;
   final VoidCallback onTap;
+  final VoidCallback onUnsave;
   final int index;
 
   const _SavedImageCard({
     required this.image,
     required this.onTap,
+    required this.onUnsave,
     required this.index,
   });
 
@@ -152,13 +157,15 @@ class _SavedImageCardState extends State<_SavedImageCard>
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.9, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.9,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
-    );
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
 
     _controller.forward();
   }
@@ -183,7 +190,7 @@ class _SavedImageCardState extends State<_SavedImageCard>
               border: Border.all(color: AppTheme.gray200),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
+                  color: Colors.black.withValues(alpha: 0.08),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -218,7 +225,7 @@ class _SavedImageCardState extends State<_SavedImageCard>
                           end: Alignment.bottomCenter,
                           colors: [
                             Colors.transparent,
-                            Colors.black.withOpacity(0.7),
+                            Colors.black.withValues(alpha: 0.7),
                           ],
                           stops: const [0.5, 1.0],
                         ),
@@ -226,27 +233,32 @@ class _SavedImageCardState extends State<_SavedImageCard>
                     ),
                   ),
 
-                  // Saved Badge
+                  // Unsave Button
                   Positioned(
                     top: 8,
                     right: 8,
-                    child: Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: AppTheme.brandPrimary,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppTheme.brandPrimary.withOpacity(0.4),
-                            blurRadius: 8,
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.auto_awesome,
-                        size: 16,
-                        color: Colors.white,
+                    child: GestureDetector(
+                      onTap: widget.onUnsave,
+                      child: Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: AppTheme.brandPrimary,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppTheme.brandPrimary.withValues(
+                                alpha: 0.4,
+                              ),
+                              blurRadius: 8,
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.bookmark,
+                          size: 16,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
@@ -259,15 +271,15 @@ class _SavedImageCardState extends State<_SavedImageCard>
                     child: Text(
                       widget.image.style,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            shadows: [
-                              Shadow(
-                                color: Colors.black.withOpacity(0.5),
-                                blurRadius: 4,
-                              ),
-                            ],
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withValues(alpha: 0.5),
+                            blurRadius: 4,
                           ),
+                        ],
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),

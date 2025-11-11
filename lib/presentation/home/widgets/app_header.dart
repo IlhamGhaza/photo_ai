@@ -8,16 +8,16 @@ class AppHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.95),
+        color: Colors.white.withValues(alpha: 0.95),
         border: Border(
           bottom: BorderSide(
-            color: AppTheme.gray200.withOpacity(0.8),
+            color: AppTheme.gray200.withValues(alpha: 0.8),
             width: 1,
           ),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -37,7 +37,7 @@ class AppHeader extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: AppTheme.brandPrimary.withOpacity(0.3),
+                    color: AppTheme.brandPrimary.withValues(alpha: 0.3),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -50,7 +50,7 @@ class AppHeader extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            
+
             // Title and Tagline
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
