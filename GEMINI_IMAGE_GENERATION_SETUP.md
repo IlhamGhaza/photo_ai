@@ -11,12 +11,12 @@ The **Photo AI app** now uses the **Google Gemini 2.5 Flash Image** model to gen
 3. Gemini generates **4 styled photos (streaming output)**
 4. Backend uploads generated images to **Firebase Storage**
 5. Returns **storage URLs** (not base64) to the Flutter app
-6. The generated styles only adjust lighting/mood — **not the background**:
+6. The generated styles create new immersive scenes while preserving the subject:
 
-   * ✨ **Golden Hour Glow** — warm golden hour lighting, sunset tones, Instagram-perfect glow
-   * 🎬 **Cinematic Drama** — dramatic lighting, deeper contrast, moody atmosphere
-   * 🌈 **Vibrant Pop** — boosted colors, vibrant and saturated, eye-catching
-   * 💫 **Dreamy Soft** — soft dreamy filter, pastel tones, ethereal mood
+   * 🏎️ **Luxury Supercar Showcase** — place the person in front of a sleek supercar on a modern city street at sunset with cinematic lighting
+   * 🌃 **Jetset Rooftop Lounge** — move the subject to a chic rooftop bar overlooking a neon-lit skyline at night
+   * 🏖️ **Tropical Beach Escape** — position the person on a white sand beach with turquoise water and warm golden hour light
+   * 🏰 **European City Stroll** — set the subject along a historic cobblestone alley with glowing café lights in the evening
 
 ---
 
@@ -238,7 +238,7 @@ Add a new object to the `socialMediaStyles` array:
 * **Response Format:** Returns signed Firebase Storage URLs (private, expires in 7 days)
 * **Storage Path:** `users/{userId}/generated/` (private per user)
 * **Image Size:** 1024×1024 (1K resolution)
-* **Style Changes:** Only lighting, color grading, and mood — original scene/background remain
+* **Style Changes:** Subjects are preserved while environments, backgrounds, and lighting shift to match each scene description
 * **Timeout:** 9 minutes total (540 seconds) for 4 images
 * **Concurrency:** Up to 10 instances running simultaneously
 

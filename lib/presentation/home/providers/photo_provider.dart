@@ -126,7 +126,7 @@ class PhotoProvider extends ChangeNotifier {
 
       // Skip Firestore update for now - URLs are too long
       // TODO: Store only image IDs or use shorter URLs
-      print('Skipping Firestore update (URLs too long for Firestore)');
+      log('Skipping Firestore update (URLs too long for Firestore)');
 
       // Create GeneratedImage objects for UI
       _generatedImages = List.generate(

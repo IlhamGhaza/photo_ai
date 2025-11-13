@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/photo_document.dart';
 
@@ -30,7 +32,7 @@ class FirestoreRepository {
       await docRef.set(photoDoc.toFirestore());
       return imageId;
     } catch (e) {
-      print('Error creating photo document: $e');
+      log('Error creating photo document: $e');
       rethrow;
     }
   }
@@ -47,11 +49,9 @@ class FirestoreRepository {
           .doc(userId)
           .collection('images')
           .doc(imageId)
-          .update({
-        'generatedUrls': generatedUrls,
-      });
+          .update({'generatedUrls': generatedUrls});
     } catch (e) {
-      print('Error updating generated URLs: $e');
+      log('Error updating generated URLs: $e');
       rethrow;
     }
   }
@@ -73,16 +73,14 @@ class FirestoreRepository {
 
       return PhotoDocument.fromFirestore(docSnapshot);
     } catch (e) {
-      print('Error getting photo document: $e');
+      log('Error getting photo document: $e');
       return null;
     }
   }
 
   /// Get all photo documents for a user
   /// Returns list ordered by creation date (newest first)
-  Future<List<PhotoDocument>> getUserPhotos({
-    required String userId,
-  }) async {
+  Future<List<PhotoDocument>> getUserPhotos({required String userId}) async {
     try {
       final querySnapshot = await _firestore
           .collection('users')
@@ -95,24 +93,24 @@ class FirestoreRepository {
           .map((doc) => PhotoDocument.fromFirestore(doc))
           .toList();
     } catch (e) {
-      print('Error getting user photos: $e');
+      log('Error getting user photos: $e');
       return [];
     }
   }
 
   /// Stream of user photos (real-time updates)
-  Stream<List<PhotoDocument>> watchUserPhotos({
-    required String userId,
-  }) {
+  Stream<List<PhotoDocument>> watchUserPhotos({required String userId}) {
     return _firestore
         .collection('users')
         .doc(userId)
         .collection('images')
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => PhotoDocument.fromFirestore(doc))
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => PhotoDocument.fromFirestore(doc))
+              .toList(),
+        );
   }
 
   /// Delete a photo document
@@ -128,7 +126,7 @@ class FirestoreRepository {
           .doc(imageId)
           .delete();
     } catch (e) {
-      print('Error deleting photo document: $e');
+      log('Error deleting photo document: $e');
       rethrow;
     }
   }
@@ -147,12 +145,12 @@ class FirestoreRepository {
           .collection('saved')
           .doc(imageId)
           .set({
-        'url': imageUrl,
-        'style': style,
-        'savedAt': FieldValue.serverTimestamp(),
-      });
+            'url': imageUrl,
+            'style': style,
+            'savedAt': FieldValue.serverTimestamp(),
+          });
     } catch (e) {
-      print('Error saving image: $e');
+      log('Error saving image: $e');
       rethrow;
     }
   }
@@ -170,7 +168,7 @@ class FirestoreRepository {
           .doc(imageId)
           .delete();
     } catch (e) {
-      print('Error unsaving image: $e');
+      log('Error unsaving image: $e');
       rethrow;
     }
   }
@@ -193,11 +191,12 @@ class FirestoreRepository {
           'id': doc.id,
           'url': data['url'] as String,
           'style': data['style'] as String,
-          'savedAt': (data['savedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          'savedAt':
+              (data['savedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
         };
       }).toList();
     } catch (e) {
-      print('Error getting saved images: $e');
+      log('Error getting saved images: $e');
       return [];
     }
   }
@@ -216,7 +215,7 @@ class FirestoreRepository {
           .get();
       return doc.exists;
     } catch (e) {
-      print('Error checking if image is saved: $e');
+      log('Error checking if image is saved: $e');
       return false;
     }
   }

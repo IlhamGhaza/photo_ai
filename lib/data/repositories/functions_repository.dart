@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_functions/cloud_functions.dart';
 
 /// Repository for Firebase Cloud Functions
@@ -13,20 +15,20 @@ class FunctionsRepository {
   }) async {
     try {
       final callable = _functions.httpsCallable('generateImages');
-      
-      final result = await callable.call({
-        'imageUrl': imageUrl,
-      });
+
+      final result = await callable.call({'imageUrl': imageUrl});
 
       // Return complete response from Cloud Function
       final data = result.data as Map<String, dynamic>;
-      
+
       return {
         'generatedUrls': List<String>.from(data['generatedUrls'] as List),
-        'stylesUsed': List<String>.from((data['styles'] as List?) ?? (data['stylesUsed'] as List?) ?? []),
+        'stylesUsed': List<String>.from(
+          (data['styles'] as List?) ?? (data['stylesUsed'] as List?) ?? [],
+        ),
       };
     } catch (e) {
-      print('Cloud Function error: $e');
+      log('Cloud Function error: $e');
       rethrow;
     }
   }
@@ -40,24 +42,22 @@ class FunctionsRepository {
     try {
       final callable = _functions.httpsCallable(
         'generateImages',
-        options: HttpsCallableOptions(
-          timeout: timeout,
-        ),
+        options: HttpsCallableOptions(timeout: timeout),
       );
-      
-      final result = await callable.call({
-        'imageUrl': imageUrl,
-      });
+
+      final result = await callable.call({'imageUrl': imageUrl});
 
       // Return complete response from Cloud Function
       final data = result.data as Map<String, dynamic>;
-      
+
       return {
         'generatedUrls': List<String>.from(data['generatedUrls'] as List),
-        'stylesUsed': List<String>.from((data['styles'] as List?) ?? (data['stylesUsed'] as List?) ?? []),
+        'stylesUsed': List<String>.from(
+          (data['styles'] as List?) ?? (data['stylesUsed'] as List?) ?? [],
+        ),
       };
     } catch (e) {
-      print('Cloud Function error: $e');
+      log('Cloud Function error: $e');
       rethrow;
     }
   }

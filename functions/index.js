@@ -110,10 +110,10 @@ async function generateSocialMediaVariations(imageUrl, userId) {
     // Generate 4 variations with social media styles (Gemini 2.5 Flash Image limit)
     const generatedImages = [];
     const socialMediaStyles = [
-      "Golden Hour Glow - Keep the exact same scene and background, but change to warm golden hour lighting with sunset tones, soft shadows, and that Instagram-perfect glow",
-      "Cinematic Drama - Maintain the same location and composition, but add dramatic lighting, deeper contrast, moody atmosphere, like a movie scene",
-      "Vibrant Pop - Same scene but boost colors to be more vibrant and saturated, bright and eye-catching, perfect for social media engagement",
-      "Dreamy Soft - Keep everything the same but add soft dreamy filter, pastel tones, gentle bokeh effect, ethereal and romantic mood",
+      // "Luxury Supercar Showcase - Place the person in front of a sleek supercar parked on a modern city street at sunset with glossy reflections and cinematic lighting",
+      "Jetset Rooftop Lounge - Move the person to a chic rooftop bar overlooking a nighttime skyline filled with neon ambience and atmospheric glow",
+      // "Tropical Beach Escape - Position the person on a white sand beach with turquoise water, palm trees, and warm golden hour light",
+      // "European City Stroll - Set the person in a historic European alley with cobblestone streets, charming cafés, and twinkling evening lights",
     ];
 
     // Initialize Gemini AI client
@@ -122,18 +122,15 @@ async function generateSocialMediaVariations(imageUrl, userId) {
     });
 
     // Build prompt for all 4 styles
-    const stylePrompt = `Generate 4 different style variations of this photo:
+    const stylePrompt = `Transform this portrait into 4 immersive scenes featuring the same person. For each style below, create a photorealistic composite:
 
 ${socialMediaStyles.map((style, i) => `${i + 1}. ${style}`).join("\n")}
 
-CRITICAL RULES - FOLLOW EXACTLY:
-- DO NOT change the background, location, or scene
-- DO NOT add new objects or remove existing elements
-- DO NOT change the person's pose, position, or appearance
-- ONLY change: lighting, color grading, mood, atmosphere, and photo filter
-- Keep the EXACT same composition and setting as the original
-- The result should look like the same photo taken at different times of day or with different camera settings
-- Make it look natural and realistic, like photos people post on Instagram
+GUIDELINES - FOLLOW EXACTLY:
+- Preserve the person's face, pose, proportions, and clothing details
+- Adjust the environment, background, props, lighting, and color grading to match each style description
+- Ensure the composites look natural and photorealistic with consistent perspective
+- Do not duplicate the person or alter their identity, expression, or wardrobe
 - Generate exactly 4 images, one for each style above`;
 
     console.log("Generating 4 social media style variations...");

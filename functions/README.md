@@ -35,10 +35,10 @@ Main callable that generates four AI-styled images from an uploaded photo.
     "https://storage.googleapis.com/<bucket>/users/UID/generated/generated_126.png"
   ],
   "styles": [
-    "Golden Hour Glow",
-    "Cinematic Drama",
-    "Vibrant Pop",
-    "Dreamy Soft"
+    "Luxury Supercar Showcase",
+    "Jetset Rooftop Lounge",
+    "Tropical Beach Escape",
+    "European City Stroll"
   ],
   "timestamp": "2025-01-01T00:00:00Z"
 }

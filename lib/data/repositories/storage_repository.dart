@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 
@@ -16,24 +17,21 @@ class StorageRepository {
     required String imageId,
     required File imageFile,
   }) async {
-    return _uploadWithRetry(
-      () async {
-        final ref = _storage.ref().child('users/$userId/original/$imageId');
-        
-        // Upload file with metadata
-        final metadata = SettableMetadata(
-          contentType: 'image/jpeg',
-          customMetadata: {'uploaded': DateTime.now().toIso8601String()},
-        );
-        
-        final uploadTask = await ref.putFile(imageFile, metadata);
-        final downloadUrl = await uploadTask.ref.getDownloadURL();
-        return downloadUrl;
-      },
-      'uploadOriginalImage',
-    );
+    return _uploadWithRetry(() async {
+      final ref = _storage.ref().child('users/$userId/original/$imageId');
+
+      // Upload file with metadata
+      final metadata = SettableMetadata(
+        contentType: 'image/jpeg',
+        customMetadata: {'uploaded': DateTime.now().toIso8601String()},
+      );
+
+      final uploadTask = await ref.putFile(imageFile, metadata);
+      final downloadUrl = await uploadTask.ref.getDownloadURL();
+      return downloadUrl;
+    }, 'uploadOriginalImage');
   }
-  
+
   /// Helper method to upload with retry logic
   Future<T> _uploadWithRetry<T>(
     Future<T> Function() uploadFunction,
@@ -42,26 +40,26 @@ class StorageRepository {
   }) async {
     int attempts = 0;
     Duration delay = const Duration(seconds: 1);
-    
+
     while (attempts < maxRetries) {
       try {
         return await uploadFunction();
       } catch (e) {
         attempts++;
-        print('$operationName attempt $attempts failed: $e');
-        
+        log('$operationName attempt $attempts failed: $e');
+
         if (attempts >= maxRetries) {
-          print('$operationName failed after $maxRetries attempts');
+          log('$operationName failed after $maxRetries attempts');
           rethrow;
         }
-        
+
         // Exponential backoff
-        print('Retrying in ${delay.inSeconds} seconds...');
+        log('Retrying in ${delay.inSeconds} seconds...');
         await Future.delayed(delay);
         delay *= 2; // Double the delay for next retry
       }
     }
-    
+
     throw Exception('$operationName failed after $maxRetries attempts');
   }
 
@@ -74,18 +72,18 @@ class StorageRepository {
     required File imageFile,
   }) async {
     try {
-      final ref = _storage
-          .ref()
-          .child('users/$userId/generated/$imageId/$index');
-      
+      final ref = _storage.ref().child(
+        'users/$userId/generated/$imageId/$index',
+      );
+
       // Upload file
       final uploadTask = await ref.putFile(imageFile);
-      
+
       // Get download URL
       final downloadUrl = await uploadTask.ref.getDownloadURL();
       return downloadUrl;
     } catch (e) {
-      print('Error uploading generated image: $e');
+      log('Error uploading generated image: $e');
       rethrow;
     }
   }
@@ -99,7 +97,7 @@ class StorageRepository {
       final ref = _storage.ref().child('users/$userId/original/$imageId');
       await ref.delete();
     } catch (e) {
-      print('Error deleting original image: $e');
+      log('Error deleting original image: $e');
       // Don't rethrow - file might not exist
     }
   }
@@ -112,13 +110,13 @@ class StorageRepository {
     try {
       final ref = _storage.ref().child('users/$userId/generated/$imageId');
       final listResult = await ref.listAll();
-      
+
       // Delete all files in the directory
       for (final item in listResult.items) {
         await item.delete();
       }
     } catch (e) {
-      print('Error deleting generated images: $e');
+      log('Error deleting generated images: $e');
       // Don't rethrow - files might not exist
     }
   }
