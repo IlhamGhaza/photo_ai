@@ -26,6 +26,7 @@ class PhotoProvider extends ChangeNotifier {
   List<GeneratedImage> _savedImages = [];
   String _errorMessage = '';
   double _generationProgress = 0.0;
+  String? _selectedStyle;
 
   // Getters
   AppState get appState => _appState;
@@ -36,30 +37,46 @@ class PhotoProvider extends ChangeNotifier {
   String get errorMessage => _errorMessage;
   double get generationProgress => _generationProgress;
   bool get hasUploadedImage => _uploadedImageFile != null;
+  String? get selectedStyle => _selectedStyle;
 
-  // Upload image to Firebase Storage and create Firestore document
-  Future<void> uploadImage(File imageFile) async {
+  // Set image locally without uploading to Firebase yet
+  // This fixes the UI bug where image clears because we set state immediately
+  Future<void> setImage(File imageFile) async {
+    _uploadedImageFile = imageFile;
+    _uploadedImagePath = imageFile.path;
+    _errorMessage = '';
+
+    // Reset other state
+    _currentImageId = null;
+    _originalImageUrl = null;
+    _generatedImages = [];
+
+    // Set state to uploaded IMMEDIATELY to show the image
+    _appState = AppState.uploaded;
+    notifyListeners();
+  }
+
+  // Internal method to upload to Firebase Storage
+  Future<void> _uploadToFirebase() async {
+    if (_uploadedImageFile == null) return;
+
     try {
-      _uploadedImageFile = imageFile;
-      _uploadedImagePath = imageFile.path;
-      _appState = AppState.uploaded;
-      _errorMessage = '';
-      notifyListeners();
-
       // Get current user ID
       final userId = _authService.currentUserId;
       if (userId == null) {
         throw Exception('User not authenticated');
       }
 
-      // Generate unique image ID
-      _currentImageId = _uuid.v4();
+      // Generate unique image ID if not exists
+      if (_currentImageId == null) {
+        _currentImageId = _uuid.v4();
+      }
 
       // Upload original image to Firebase Storage
       _originalImageUrl = await _storageRepository.uploadOriginalImage(
         userId: userId,
         imageId: _currentImageId!,
-        imageFile: imageFile,
+        imageFile: _uploadedImageFile!,
       );
 
       // Create Firestore document
@@ -68,18 +85,25 @@ class PhotoProvider extends ChangeNotifier {
         imageId: _currentImageId!,
         originalUrl: _originalImageUrl!,
       );
+
+      log('Image uploaded successfully: $_originalImageUrl');
     } catch (e) {
-      _errorMessage = 'Failed to upload image: ${e.toString()}';
-      _appState = AppState.error;
-      notifyListeners();
+      log('Error uploading image: $e');
+      rethrow;
     }
+  }
+
+  // Set selected style for generation
+  void setSelectedStyle(String? style) {
+    _selectedStyle = style;
+    notifyListeners();
   }
 
   // Generate images using Cloud Functions ONLY
   // ALL AI logic is in backend - mobile app just calls the function
-  Future<void> generateImages() async {
-    if (_originalImageUrl == null || _currentImageId == null) {
-      _errorMessage = 'Please upload an image first';
+  Future<void> generateImages({String? selectedStyle}) async {
+    if (_uploadedImageFile == null) {
+      _errorMessage = 'Please select an image first';
       _appState = AppState.error;
       notifyListeners();
       return;
@@ -91,6 +115,12 @@ class PhotoProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      // 1. Upload image if not already uploaded
+      if (_originalImageUrl == null) {
+        _generationProgress = 0.1;
+        notifyListeners();
+        await _uploadToFirebase();
+      }
       // Get current user ID
       final userId = _authService.currentUserId;
       if (userId == null) {
@@ -101,12 +131,20 @@ class PhotoProvider extends ChangeNotifier {
       _generationProgress = 0.1;
       notifyListeners();
 
+      // Use provided style or stored style
+      final styleToUse = selectedStyle ?? _selectedStyle;
+
       // Call Cloud Function - ALL AI logic happens on backend
       // This is secure - no API keys or AI logic exposed in mobile app
-      log('Calling Cloud Function with imageUrl: $_originalImageUrl');
+      log(
+        'Calling Cloud Function with imageUrl: $_originalImageUrl, style: $styleToUse',
+      );
       final result = await _functionsRepository.generateImagesWithTimeout(
         imageUrl: _originalImageUrl!,
-        timeout: const Duration(minutes: 10), // Increased for Gemini image generation
+        selectedStyle: styleToUse,
+        timeout: const Duration(
+          minutes: 10,
+        ), // Increased for Gemini image generation
       );
       log('Cloud Function response: $result');
 
@@ -134,7 +172,9 @@ class PhotoProvider extends ChangeNotifier {
         (index) => GeneratedImage(
           id: _uuid.v4(),
           url: generatedUrls[index],
-          style: index < styles.length ? styles[index] : 'Generated Style ${index + 1}',
+          style: index < styles.length
+              ? styles[index]
+              : 'Generated Style ${index + 1}',
         ),
       );
 
@@ -161,8 +201,10 @@ class PhotoProvider extends ChangeNotifier {
       final userId = _authService.currentUserId;
       if (userId == null) return;
 
-      final savedData = await _firestoreRepository.getSavedImages(userId: userId);
-      
+      final savedData = await _firestoreRepository.getSavedImages(
+        userId: userId,
+      );
+
       // Convert to GeneratedImage objects
       _savedImages = savedData.map((data) {
         return GeneratedImage(
@@ -172,7 +214,7 @@ class PhotoProvider extends ChangeNotifier {
           createdAt: data['savedAt'] as DateTime,
         );
       }).toList();
-      
+
       notifyListeners();
     } catch (e) {
       log('Error loading saved images: $e');
@@ -184,7 +226,7 @@ class PhotoProvider extends ChangeNotifier {
     try {
       final userId = _authService.currentUserId;
       log('Attempting to save image. UserId: $userId, ImageId: ${image.id}');
-      
+
       if (userId == null) {
         log('Cannot save: User not authenticated');
         return;
@@ -217,10 +259,7 @@ class PhotoProvider extends ChangeNotifier {
       if (userId == null) return;
 
       // Remove from Firestore
-      await _firestoreRepository.unsaveImage(
-        userId: userId,
-        imageId: imageId,
-      );
+      await _firestoreRepository.unsaveImage(userId: userId, imageId: imageId);
 
       // Remove from local list
       _savedImages.removeWhere((img) => img.id == imageId);

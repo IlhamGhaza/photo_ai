@@ -8,15 +8,21 @@ class FunctionsRepository {
   final FirebaseFunctions _functions = FirebaseFunctions.instance;
 
   /// Call generateImages Cloud Function
-  /// Input: { imageUrl: string }
+  /// Input: { imageUrl: string, selectedStyle: string? }
   /// Output: { generatedUrls: string[], stylesUsed: string[] }
   Future<Map<String, dynamic>> generateImages({
     required String imageUrl,
+    String? selectedStyle,
   }) async {
     try {
       final callable = _functions.httpsCallable('generateImages');
 
-      final result = await callable.call({'imageUrl': imageUrl});
+      final params = {'imageUrl': imageUrl};
+      if (selectedStyle != null) {
+        params['selectedStyle'] = selectedStyle;
+      }
+
+      final result = await callable.call(params);
 
       // Return complete response from Cloud Function
       final data = result.data as Map<String, dynamic>;
@@ -37,6 +43,7 @@ class FunctionsRepository {
   /// Useful for long-running AI operations
   Future<Map<String, dynamic>> generateImagesWithTimeout({
     required String imageUrl,
+    String? selectedStyle,
     Duration timeout = const Duration(minutes: 5),
   }) async {
     try {
@@ -45,7 +52,12 @@ class FunctionsRepository {
         options: HttpsCallableOptions(timeout: timeout),
       );
 
-      final result = await callable.call({'imageUrl': imageUrl});
+      final params = {'imageUrl': imageUrl};
+      if (selectedStyle != null) {
+        params['selectedStyle'] = selectedStyle;
+      }
+
+      final result = await callable.call(params);
 
       // Return complete response from Cloud Function
       final data = result.data as Map<String, dynamic>;

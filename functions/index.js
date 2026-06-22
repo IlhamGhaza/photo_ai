@@ -1,21 +1,21 @@
 /**
  * Firebase Cloud Functions for Photo AI
- * 
+ *
  * This module handles secure AI image generation by:
  * 1. Receiving image URLs from authenticated Flutter clients
  * 2. Calling Google Gemini API to generate 6 social media style variations
  * 3. Returning generated image URLs from Gemini to the client
- * 
+ *
  * Security: API keys are stored in Firebase environment config,
  * never exposed to the client.
  */
 
-const {onCall, HttpsError} = require("firebase-functions/v2/https");
-const {setGlobalOptions} = require("firebase-functions/v2");
-const {defineString} = require("firebase-functions/params");
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const { setGlobalOptions } = require("firebase-functions/v2");
+const { defineString } = require("firebase-functions/params");
 const admin = require("firebase-admin");
 const axios = require("axios");
-const {GoogleGenAI} = require("@google/genai");
+const { GoogleGenAI } = require("@google/genai");
 
 // Initialize Firebase Admin
 admin.initializeApp();
@@ -33,70 +33,82 @@ const GEMINI_API_KEY = defineString("GEMINI_API_KEY");
 
 /**
  * Generate AI images from an uploaded photo
- * 
+ *
  * @param {Object} data - Request data
  * @param {string} data.imageUrl - URL of the uploaded image in Firebase Storage
+ * @param {string} data.selectedStyle - Target scene style (beach, mountain, car, city, café, night_city)
  * @param {Object} context - Function context with auth info
  * @returns {Promise<Object>} Object containing array of generated image URLs
  */
 exports.generateImages = onCall(async (request) => {
-  const {data, auth} = request;
+  const { data, auth } = request;
 
   // Verify authentication
   if (!auth) {
     throw new HttpsError(
-        "unauthenticated",
-        "User must be authenticated to generate images",
+      "unauthenticated",
+      "User must be authenticated to generate images"
     );
   }
 
   // Validate input
   if (!data.imageUrl || typeof data.imageUrl !== "string") {
     throw new HttpsError(
-        "invalid-argument",
-        "imageUrl is required and must be a string",
+      "invalid-argument",
+      "imageUrl is required and must be a string"
     );
   }
 
-  const {imageUrl} = data;
+  const { imageUrl, selectedStyle } = data;
   const userId = auth.uid;
 
-  console.log(`Generating images for user ${userId} with image: ${imageUrl}`);
+  console.log(
+    `Generating images for user ${userId} with image: ${imageUrl}, style: ${
+      selectedStyle || "auto"
+    }`
+  );
 
   try {
-    // Generate 4 social media style variations using Gemini
-    const generatedImages = await generateSocialMediaVariations(imageUrl, userId);
+    // Generate social media style photo using Gemini
+    const generatedImages = await generateSocialMediaVariations(
+      imageUrl,
+      userId,
+      selectedStyle
+    );
     console.log(`Generated ${generatedImages.length} image variations`);
 
     // Return results
     return {
       success: true,
-      generatedUrls: generatedImages.map(img => img.url),
-      styles: generatedImages.map(img => img.style),
+      generatedUrls: generatedImages.map((img) => img.url),
+      styles: generatedImages.map((img) => img.style),
       timestamp: admin.firestore.FieldValue.serverTimestamp(),
     };
   } catch (error) {
     console.error("Error generating images:", error);
     throw new HttpsError(
-        "internal",
-        `Failed to generate images: ${error.message}`,
+      "internal",
+      `Failed to generate images: ${error.message}`
     );
   }
 });
 
 /**
- * Generate 4 social media style variations using Google Gemini API
- * 
+ * Generate social media style photo using Google Gemini API
+ *
  * @param {string} imageUrl - URL of the image to transform
  * @param {string} userId - User ID for private storage path
+ * @param {string} selectedStyle - Target scene style (beach, mountain, car, city, café, night_city)
  * @returns {Promise<Array<{url: string, style: string}>>} Array of generated images with styles
  */
-async function generateSocialMediaVariations(imageUrl, userId) {
+async function generateSocialMediaVariations(imageUrl, userId, selectedStyle) {
   // Get Gemini API key from environment config
   const geminiApiKey = GEMINI_API_KEY.value() || process.env.GEMINI_API_KEY;
 
   if (!geminiApiKey) {
-    throw new Error("GEMINI_API_KEY not configured. Please set up Gemini API key in Firebase environment.");
+    throw new Error(
+      "GEMINI_API_KEY not configured. Please set up Gemini API key in Firebase environment."
+    );
   }
 
   try {
@@ -107,33 +119,85 @@ async function generateSocialMediaVariations(imageUrl, userId) {
     });
     const imageBase64 = Buffer.from(imageResponse.data).toString("base64");
 
-    // Generate 4 variations with social media styles (Gemini 2.5 Flash Image limit)
+    // Define scene configurations for realistic social media photos
+    const sceneConfigs = {
+      beach: {
+        name: "Beach Escape",
+        description: "sunny beach with white sand and turquoise ocean",
+        lighting: "warm golden hour sunlight, soft shadows on sand",
+        atmosphere: "relaxed vacation vibe, gentle ocean breeze feel",
+      },
+      mountain: {
+        name: "Mountain Adventure",
+        description: "scenic mountain landscape with green valleys and peaks",
+        lighting: "fresh outdoor daylight, natural mountain atmosphere",
+        atmosphere: "adventurous outdoor feel, crisp mountain air",
+      },
+      car: {
+        name: "Luxury Car Lifestyle",
+        description: "standing beside a modern luxury car on urban street",
+        lighting: "urban ambient light with subtle reflections on car surface",
+        atmosphere: "sophisticated lifestyle vibe, confident pose",
+      },
+      city: {
+        name: "City Life",
+        description:
+          "vibrant city street with modern buildings and urban elements",
+        lighting: "natural daylight with urban shadows and reflections",
+        atmosphere: "energetic city lifestyle, contemporary urban feel",
+      },
+      café: {
+        name: "Café Moment",
+        description: "cozy café setting with warm interior or outdoor terrace",
+        lighting: "soft ambient café lighting, warm and inviting tones",
+        atmosphere: "casual relaxed vibe, social lifestyle feel",
+      },
+      night_city: {
+        name: "Night City Glow",
+        description:
+          "nighttime city scene with neon lights and illuminated buildings",
+        lighting: "neon glow, soft bokeh lights, cinematic night atmosphere",
+        atmosphere: "vibrant nightlife energy, urban sophistication",
+      },
+    };
+
+    // Use selected style or default to beach
+    const targetScene = sceneConfigs[selectedStyle] || sceneConfigs.beach;
     const generatedImages = [];
-    const socialMediaStyles = [
-      // "Luxury Supercar Showcase - Place the person in front of a sleek supercar parked on a modern city street at sunset with glossy reflections and cinematic lighting",
-      "Jetset Rooftop Lounge - Move the person to a chic rooftop bar overlooking a nighttime skyline filled with neon ambience and atmospheric glow",
-      // "Tropical Beach Escape - Position the person on a white sand beach with turquoise water, palm trees, and warm golden hour light",
-      // "European City Stroll - Set the person in a historic European alley with cobblestone streets, charming cafés, and twinkling evening lights",
-    ];
 
     // Initialize Gemini AI client
     const ai = new GoogleGenAI({
       apiKey: geminiApiKey,
     });
 
-    // Build prompt for all 4 styles
-    const stylePrompt = `Transform this portrait into 4 immersive scenes featuring the same person. For each style below, create a photorealistic composite:
+    // Build casual Instagram-style photo prompt
+    const stylePrompt = `Create a casual, natural Instagram photo using the person in the input image.
+This should look like a candid moment someone captured on their phone - NOT a professional photoshoot.
 
-${socialMediaStyles.map((style, i) => `${i + 1}. ${style}`).join("\n")}
+Scene: ${targetScene.name}
+Environment: ${targetScene.description}
 
-GUIDELINES - FOLLOW EXACTLY:
-- Preserve the person's face, pose, proportions, and clothing details
-- Adjust the environment, background, props, lighting, and color grading to match each style description
-- Ensure the composites look natural and photorealistic with consistent perspective
-- Do not duplicate the person or alter their identity, expression, or wardrobe
-- Generate exactly 4 images, one for each style above`;
+Style Guidelines:
+- Make it look like a spontaneous, real-life moment (not posed or staged)
+- Use phone camera quality - slightly imperfect, authentic feel
+- The person should blend seamlessly into the scene (NO cut-out edges or pasted look)
+- Lighting: ${targetScene.lighting} - but keep it natural and casual, not studio-perfect
+- Add realistic shadows, reflections, and natural depth
+- Atmosphere: ${targetScene.atmosphere}
+- Keep the person fully recognizable (face, body, clothing unchanged)
+- Make it feel like something you'd scroll past on Instagram - casual, relatable, authentic
+- NO bokeh or excessive blur. Keep the background relatively clear like a phone photo.
+- NO studio lighting. Use natural, slightly imperfect lighting.
 
-    console.log("Generating 4 social media style variations...");
+Think: "Friend took this photo of me during a trip" NOT "Professional photographer session"
+
+Output:
+A casual, Instagram-worthy photo that looks like it was taken in the moment with a phone.
+Natural, authentic, and effortlessly cool - not overly polished or staged.`;
+
+    console.log(
+      `Generating social media photo with style: ${targetScene.name}...`
+    );
 
     try {
       // Use Gemini 2.5 Flash Image model with streaming
@@ -144,7 +208,7 @@ GUIDELINES - FOLLOW EXACTLY:
         },
       };
 
-      const model = "gemini-2.5-flash-image";
+      const model = "gemini-3-pro-image-preview";
       const contents = [
         {
           role: "user",
@@ -170,7 +234,11 @@ GUIDELINES - FOLLOW EXACTLY:
 
       let imageIndex = 0;
       for await (const chunk of response) {
-        if (!chunk.candidates || !chunk.candidates[0].content || !chunk.candidates[0].content.parts) {
+        if (
+          !chunk.candidates ||
+          !chunk.candidates[0].content ||
+          !chunk.candidates[0].content.parts
+        ) {
           continue;
         }
 
@@ -180,53 +248,63 @@ GUIDELINES - FOLLOW EXACTLY:
           const mimeType = inlineData.mimeType || "image/png";
           const imageData = inlineData.data;
 
-          if (imageData && imageIndex < socialMediaStyles.length) {
-            const styleName = socialMediaStyles[imageIndex].split(" - ")[0];
-            
+          if (imageData) {
+            const styleName = targetScene.name;
+
             // Upload to Firebase Storage instead of returning base64
             try {
               const imageBuffer = Buffer.from(imageData, "base64");
               const fileName = `generated_${Date.now()}_${imageIndex}.png`;
               const bucket = admin.storage().bucket();
               const file = bucket.file(`users/${userId}/generated/${fileName}`);
-              
+
               await file.save(imageBuffer, {
                 metadata: {
                   contentType: mimeType,
                 },
               });
-              
+
               // Make file publicly accessible
               await file.makePublic();
-              
+
               // Small delay to ensure file is accessible
               await new Promise((resolve) => setTimeout(resolve, 500));
-              
+
               // Get public URL
               const publicUrl = `https://storage.googleapis.com/${bucket.name}/${file.name}`;
-              
+
               generatedImages.push({
                 url: publicUrl,
                 style: styleName,
               });
-              
-              console.log(`Generated and uploaded image ${imageIndex + 1}: ${styleName}`);
+
+              console.log(
+                `Generated and uploaded image ${imageIndex + 1}: ${styleName}`
+              );
             } catch (uploadError) {
-              console.error(`Error uploading image ${imageIndex + 1}:`, uploadError.message);
+              console.error(
+                `Error uploading image ${imageIndex + 1}:`,
+                uploadError.message
+              );
               // Skip this image if upload fails
             }
-            
+
             imageIndex++;
           }
         }
       }
     } catch (error) {
-      console.error("Error generating images with Gemini 2.5 Flash Image:", error.message);
+      console.error(
+        "Error generating images with Gemini 2.5 Flash Image:",
+        error.message
+      );
       throw error;
     }
 
     if (generatedImages.length === 0) {
-      throw new Error("Failed to generate any images. Please check Gemini API configuration.");
+      throw new Error(
+        "Failed to generate any images. Please check Gemini API configuration."
+      );
     }
 
     return generatedImages;
@@ -235,7 +313,6 @@ GUIDELINES - FOLLOW EXACTLY:
     throw error;
   }
 }
-
 
 /**
  * Health check function for testing deployment

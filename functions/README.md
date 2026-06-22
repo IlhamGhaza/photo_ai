@@ -123,7 +123,7 @@ firebase deploy --only functions:generateImages
 flowchart TD
   A[Flutter App] -->|Authenticated call| B[Callable Function generateImages]
   B --> C[Download original photo from Storage]
-  C --> D[Gemini 2.5 Flash Image - 4 variations]
+  C --> D[Gemini 2.5 Flash Image - 1 variations]
   D --> E[Upload to Storage users/uid/generated/]
   E --> F["Make public (or signed) URL"]
   F --> G[Return URLs + styles to client]

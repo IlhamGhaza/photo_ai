@@ -42,9 +42,7 @@ class _HomePageState extends State<HomePage> {
   void _navigateToSavedImages() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const SavedImagesPage(),
-      ),
+      MaterialPageRoute(builder: (context) => const SavedImagesPage()),
     );
   }
 
@@ -69,8 +67,10 @@ class _HomePageState extends State<HomePage> {
                     return SingleChildScrollView(
                       child: ConstrainedBox(
                         constraints: BoxConstraints(
-                          minHeight: MediaQuery.of(context).size.height - 
-                                     MediaQuery.of(context).padding.top - 80,
+                          minHeight:
+                              MediaQuery.of(context).size.height -
+                              MediaQuery.of(context).padding.top -
+                              80,
                         ),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
@@ -90,10 +90,7 @@ class _HomePageState extends State<HomePage> {
       ),
       // Image Modal
       bottomSheet: _selectedImageUrl != null
-          ? ImageModal(
-              imageUrl: _selectedImageUrl!,
-              onClose: _closeImageModal,
-            )
+          ? ImageModal(imageUrl: _selectedImageUrl!, onClose: _closeImageModal)
           : null,
     );
   }
@@ -104,17 +101,15 @@ class _HomePageState extends State<HomePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 32),
-          
+
           // Saved Images Card - Always accessible
           SavedImagesCard(
             savedCount: provider.savedImages.length,
             onTap: () => _navigateToSavedImages(),
           ),
-          
+
           // Empty State
-          EmptyStateWidget(
-            onImageSelected: (file) => provider.uploadImage(file),
-          ),
+          EmptyStateWidget(onImageSelected: (file) => provider.setImage(file)),
         ],
       );
     }
@@ -123,18 +118,18 @@ class _HomePageState extends State<HomePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 32),
-        
+
         // Saved Images Card - Always accessible
         SavedImagesCard(
           savedCount: provider.savedImages.length,
           onTap: () => _navigateToSavedImages(),
         ),
-        
+
         // Upload Section
         UploadSection(
           imagePath: provider.uploadedImagePath,
           imageFile: provider.uploadedImageFile,
-          onImageSelected: (file) => provider.uploadImage(file),
+          onImageSelected: (file) => provider.setImage(file),
           onReset: () => provider.reset(),
         ),
 
@@ -146,6 +141,8 @@ class _HomePageState extends State<HomePage> {
           errorMessage: provider.errorMessage,
           generationProgress: provider.generationProgress,
           hasUploadedImage: provider.hasUploadedImage,
+          selectedStyle: provider.selectedStyle,
+          onStyleSelected: (style) => provider.setSelectedStyle(style),
           onGenerate: () => provider.generateImages(),
         ),
 

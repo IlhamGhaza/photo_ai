@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../providers/photo_provider.dart';
+import 'style_selector.dart';
 
 class GenerateSection extends StatefulWidget {
   final AppState appState;
   final String errorMessage;
   final double generationProgress;
   final bool hasUploadedImage;
+  final String? selectedStyle;
+  final ValueChanged<String?> onStyleSelected;
   final VoidCallback onGenerate;
 
   const GenerateSection({
@@ -15,6 +18,8 @@ class GenerateSection extends StatefulWidget {
     required this.errorMessage,
     required this.generationProgress,
     required this.hasUploadedImage,
+    required this.selectedStyle,
+    required this.onStyleSelected,
     required this.onGenerate,
   });
 
@@ -49,6 +54,16 @@ class _GenerateSectionState extends State<GenerateSection>
 
     return Column(
       children: [
+        // Style Selector
+        if (widget.hasUploadedImage && !isGenerating) ...[
+          StyleSelector(
+            selectedStyle: widget.selectedStyle,
+            onStyleSelected: widget.onStyleSelected,
+            enabled: !isGenerating,
+          ),
+          const SizedBox(height: 24),
+        ],
+
         // Generate Button
         SizedBox(
           width: double.infinity,

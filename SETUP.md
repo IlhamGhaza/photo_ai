@@ -151,14 +151,14 @@ flutter test
 
 ## 9. Troubleshooting
 
-| Issue | Resolution |
-| ----- | ---------- |
-| `MissingPluginException` on Firebase services | Run `flutter clean`, then `flutter pub get`. Make sure Firebase initialization occurs before usage. |
-| `Gemini API Error` in console | Verify `GEMINI_API_KEY` is correct, billing is enabled, and the model `gemini-2.5-flash-image` is available. |
-| Generated images not appearing | Ensure the Cloud Function deployed successfully, images exist in `users/{uid}/generated/`, and Storage rules permit reads for the authenticated user. |
-| Cloud Functions not deploying | Ensure Node.js 18+ is installed and Firebase CLI is up to date. Check `firebase login` status. |
-| Cloud Functions timeout | Increase timeout in `functions/index.js` (currently 9 minutes) or check Gemini API response time. |
-| `unauthenticated` error from functions | Ensure user is signed in before calling functions. Check Firebase Auth setup. |
+| Issue                                         | Resolution                                                                                                                                            |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MissingPluginException` on Firebase services | Run `flutter clean`, then `flutter pub get`. Make sure Firebase initialization occurs before usage.                                                   |
+| `Gemini API Error` in console                 | Verify `GEMINI_API_KEY` is correct, billing is enabled, and the model `gemini-3-pro-image-preview` is available.                                      |
+| Generated images not appearing                | Ensure the Cloud Function deployed successfully, images exist in `users/{uid}/generated/`, and Storage rules permit reads for the authenticated user. |
+| Cloud Functions not deploying                 | Ensure Node.js 18+ is installed and Firebase CLI is up to date. Check `firebase login` status.                                                        |
+| Cloud Functions timeout                       | Increase timeout in `functions/index.js` (currently 9 minutes) or check Gemini API response time.                                                     |
+| `unauthenticated` error from functions        | Ensure user is signed in before calling functions. Check Firebase Auth setup.                                                                         |
 
 ## 10. Deployment Checklist
 
